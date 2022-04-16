@@ -1,14 +1,13 @@
 package jp.co.tk.domain.repo;
 
-import org.jsoup.nodes.Document;
-
 import java.io.IOException;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Webサイトにリクエストを送信し、HTML等の情報を取得するIFを定義します。
  */
-public interface WebContentRepository {
+public interface WebContentRepository<T, U> {
 
     /**
      * Webページにリクエストする際のユーザーエージェントを定義します。
@@ -23,22 +22,47 @@ public interface WebContentRepository {
     /**
      * 以下、クエリパラーメーターを作成する際にしようする文字列です。
      */
-    public final static String SLASH = "/";
+    String SLASH = "/";
 
     /**
      * クエリパラメーターの？を表します。
      */
-    public final static String QUERY_PARAM_KEY = "?";
+    String QUERY_PARAM_KEY = "?";
 
     /**
      * クエリパラメーターのキーと値をつなぐ = を表します。
      */
-    public final static String EQUAL = "=";
+    String EQUAL = "=";
 
     /**
      * 複数のクエリパラメーターをつなぐ時の & を表します。
      */
-    public final static String AND = "&";
+    String AND = "&";
+
+    /**
+     * aタグを抜き出すためのキーです。
+     */
+    String A_TAG = "a";
+
+    /**
+     * spanタグを抜き出すためのキーです。
+     */
+    String SPAN_TAG = "span";
+
+    /**
+     * imgタグを抜き出すためのキーです。
+     */
+    String IMG_TAG = "img";
+
+    /**
+     * src属性を抜き出すためのキーです。
+     */
+    String SRC_ATTR = "src";
+
+    /**
+     * ブランクを表す文字列です。
+     */
+    String BLANK = "";
 
     /**
      * Webコンテンツを取得します。
@@ -46,7 +70,7 @@ public interface WebContentRepository {
      * @param productId
      * @return 実装基で定義したクラス
      */
-    Document fetchByProductId(String productId) throws IOException;
+    T fetchByProductId(U productId) throws IOException;
 
     /**
      * URLを基に、Webコンテンツを取得します。
@@ -57,7 +81,7 @@ public interface WebContentRepository {
      * @param offset
      * @return 実装基で定義したクラス
      */
-    Document fetchProductNameListPageBySeller(String seller, int limit, int offset) throws IOException;
+    Set<U> fetchProductNameListPageBySeller(String seller, int limit, int offset) throws IOException;
 
 
     /**

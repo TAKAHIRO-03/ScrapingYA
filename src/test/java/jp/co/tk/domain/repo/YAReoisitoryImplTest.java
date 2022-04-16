@@ -1,11 +1,12 @@
 package jp.co.tk.domain.repo;
 
 
-import jp.co.tk.domain.model.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -22,6 +23,7 @@ public class YAReoisitoryImplTest {
 
     @Test
     public void 例外が発生せずにWebページにリクエストが出来ること() throws Exception {
+        Thread.sleep(500);
         try {
             this.repo.fetchProductNameListPageBySeller("tomomooo0716", 100, 0);
         } catch (Exception e) {
@@ -37,6 +39,26 @@ public class YAReoisitoryImplTest {
 
         actual = repo.createUrlAsStr("tomomooo0716", 100, 0);
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void 出品者ページからデータを取得しIDとカテゴリを取得する() throws Exception {
+        Thread.sleep(500);
+        var actual = this.repo.fetchProductNameListPageBySeller("tomomooo0716", 100, 0);
+        assertThat(actual).hasSize(5);
+    }
+
+
+    @Test
+    public void 商品ページから各種情報を取得する() throws Exception {
+        Thread.sleep(500);
+        var idAndCategorySet = this.repo.fetchProductNameListPageBySeller("tomomooo0716", 100, 0);
+        var idAndCategoryList = new ArrayList<>(idAndCategorySet);
+
+        Thread.sleep(500);
+        var actual = this.repo.fetchByProductId(idAndCategoryList.get(0));
+
+        assertThat(actual).isNotNull();
     }
 
 }
