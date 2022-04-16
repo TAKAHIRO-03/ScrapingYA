@@ -28,14 +28,14 @@ public class YAServiceTest {
 
     @Test
     public void 出品者及び商品情報を取得することが出来るか() throws Exception {
-        var actual = this.serv.findSellerBySellerName("tomomooo0716", 5);
+        var actual = this.serv.findSellerBySellerName("tomomooo0716", 5, 0);
         assertThat(actual.getProduct().size()).isEqualTo(5);
     }
 
     @Test
     public void 画像を生成することが出来るか() throws Exception {
-        var seller = this.serv.findSellerBySellerName("tomomooo0716", 5);
-        var result = this.serv.generateImg("./out/".concat(seller.getName()), seller);
+        var seller = this.serv.findSellerBySellerName("tomomooo0716", 5, 0);
+        var result = this.serv.generateImg(seller);
         CompletableFuture.completedFuture(result);
     }
 

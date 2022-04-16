@@ -36,7 +36,7 @@ public class YAService {
     /**
      * ヤフオクにリクエストを送る際のスリープ時間を表します。
      */
-    private final int sleepSecond = 300;
+    private final int sleepMillSecond = 1500;
 
     /**
      * ヤフオクから１回に何件の情報を取得するかを表します。
@@ -52,6 +52,11 @@ public class YAService {
      * /の記号を表します。
      */
     private final static String SLASH = "/";
+
+    /**
+     * ベースの出力先ディレクトリ
+     */
+    private final static String BASE_OUT_DIR = "./out/";
 
     /**
      * 出品者に紐づく、商品の個数を返却します。
@@ -73,7 +78,7 @@ public class YAService {
      * @throws IOException
      * @throws InterruptedException
      */
-    public Seller findSellerBySellerName(final String seller, final int total) throws IOException, InterruptedException {
+    public Seller findSellerBySellerName(final String seller, final long total, final int offsetFromTotal) throws IOException, InterruptedException {
 
         if (total == 0) {
             return new Seller(seller, Collections.emptySet());
@@ -82,12 +87,12 @@ public class YAService {
         final var offsetNum = Math.max(Math.ceil(total / limit), 1);
         final var products = new HashSet<Product>();
         for (int i = 0; i < offsetNum; i++) {
-            final Set<YAProduct.IdAndCategory> idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, limit, i * limit);
-            Thread.sleep(sleepSecond);
+            final Set<YAProduct.IdAndCategory> idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, limit, i * limit + offsetFromTotal);
+            Thread.sleep(sleepMillSecond);
             for (final YAProduct.IdAndCategory id : idAndCategory) {
                 final Product product = this.repo.fetchByProductId(id);
                 products.add(product);
-                Thread.sleep(sleepSecond);
+                Thread.sleep(sleepMillSecond);
             }
         }
 
@@ -97,19 +102,19 @@ public class YAService {
     /**
      * ヤフオクから画像を取得後、画像を生成します。
      *
-     * @param dirName
      * @param seller
      * @throws IOException
      * @throws InterruptedException
      */
     @Async("GenImgThread")
-    public CompletableFuture<Void> generateImg(final String dirName, final Seller seller) throws IOException, InterruptedException {
+    public CompletableFuture<Void> generateImg(final Seller seller) throws IOException, InterruptedException {
 
         if (CollectionUtils.isEmpty(seller.getProduct())) {
             log.debug("product is empty. seller=".concat(seller.getName()));
             return CompletableFuture.completedFuture(null);
         }
 
+        final String dirName = BASE_OUT_DIR.concat(seller.getName());
         final Path filePath = Paths.get(dirName);
         if (!Files.exists(filePath)) {
             Files.createDirectory(filePath);
@@ -120,7 +125,8 @@ public class YAService {
             final var imgUrls = yap.getImageUrl();
             for (final var url : imgUrls) {
                 final var imgBinaryData = this.repo.fetchProductImgData(url);
-                Thread.sleep(sleepSecond);
+                log.debug("url=".concat(url.toString()));
+                Thread.sleep(sleepMillSecond);
                 try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData);) {
                     final var image = ImageIO.read(bis);
                     EXTENSION_LIST.stream().forEach(extension -> {
