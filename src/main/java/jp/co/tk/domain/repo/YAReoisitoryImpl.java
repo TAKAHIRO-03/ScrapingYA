@@ -172,7 +172,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
      * {@inheritDoc}
      */
     @Override
-    public int fetchTotalNumberOfProducts(final String seller) throws IOException {
+    public long fetchTotalNumberOfProducts(final String seller) throws IOException {
 
         final var userAgent = getRandomUserAgent();
         final var urlBlr = new StringBuilder(SELLER_URL);

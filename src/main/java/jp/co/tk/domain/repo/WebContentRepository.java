@@ -114,7 +114,7 @@ public interface WebContentRepository<T, U> {
      * @param seller 出品者
      * @return 商品数
      */
-    int fetchTotalNumberOfProducts(final String seller) throws IOException;
+    long fetchTotalNumberOfProducts(final String seller) throws IOException;
 
 
     /**

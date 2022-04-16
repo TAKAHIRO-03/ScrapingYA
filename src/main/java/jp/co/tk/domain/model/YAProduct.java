@@ -1,10 +1,10 @@
 package jp.co.tk.domain.model;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.net.URL;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -12,7 +12,6 @@ import java.util.Set;
  */
 @Builder
 @Value
-@EqualsAndHashCode(of = "id")
 public class YAProduct extends Product {
 
     /**
@@ -82,6 +81,19 @@ public class YAProduct extends Product {
          */
         String category;
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        YAProduct product = (YAProduct) o;
+        return Objects.equals(idAndCategory.id, product.idAndCategory.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idAndCategory.id);
     }
 
 }
