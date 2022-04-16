@@ -3,7 +3,6 @@ package jp.co.tk;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.Executor;
 
@@ -12,17 +11,6 @@ import java.util.concurrent.Executor;
  */
 @Configuration
 public class JavaConfig {
-
-    /**
-     * HTTP通信するクライアントを定義します。
-     *
-     * @return RestTemplateオブジェクト
-     */
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
 
     /**
      * 非同期のオブジェクトを返却します。
@@ -35,6 +23,21 @@ public class JavaConfig {
         executor.setCorePoolSize(1);
         executor.setQueueCapacity(3);
         executor.setThreadNamePrefix("GenImgThread-");
+        executor.initialize();
+        return executor;
+    }
+
+    /**
+     * 非同期のオブジェクトを返却します。
+     *
+     * @return Executor
+     */
+    @Bean("GenCsvThread")
+    public Executor generateCsvTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setQueueCapacity(3);
+        executor.setThreadNamePrefix("GenCsvThread-");
         executor.initialize();
         return executor;
     }

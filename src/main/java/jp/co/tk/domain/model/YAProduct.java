@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 
@@ -62,7 +63,35 @@ public class YAProduct extends Product {
      */
     @Override
     public String csvData() {
-        return null;
+
+        final var sb = new StringBuilder();
+        sb.append(idAndCategory.getCategory());
+        sb.append(COMMA);
+        sb.append(title);
+        sb.append(COMMA);
+        sb.append(description);
+        sb.append(COMMA);
+        sb.append(startingPrice);
+        sb.append(COMMA);
+        sb.append(buyoutPrice);
+        sb.append(COMMA);
+
+        final var imgUrlLen = imageUrl.size();
+        final var imgUrlList = new ArrayList<>(imageUrl);
+        for (int i = 0; i < imgUrlLen; i++) {
+            final String[] urlSplitedWithSlash = imgUrlList.get(i).toString().split(SLASH);
+            final String fileName = urlSplitedWithSlash[urlSplitedWithSlash.length - 1];
+            sb.append(fileName);
+            sb.append(COMMA);
+        }
+        for(int i = 0, max = 10 - imgUrlLen; i < max; i++) {
+            sb.append(COMMA);
+        }
+
+        final int sbLen = sb.length();
+        sb.delete(sbLen - 2, sbLen);
+
+        return sb.toString();
     }
 
     /**
@@ -83,6 +112,9 @@ public class YAProduct extends Product {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,6 +123,9 @@ public class YAProduct extends Product {
         return Objects.equals(idAndCategory.id, product.idAndCategory.id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(idAndCategory.id);

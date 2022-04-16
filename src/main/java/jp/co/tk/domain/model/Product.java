@@ -6,15 +6,23 @@ package jp.co.tk.domain.model;
 public abstract class Product {
 
     /**
-     *
+     * カンマを表すフィールドです。
+     */
+    public static String COMMA = ",";
+
+    /**
+     * スラッシュを表すフィールドです。
+     */
+    public static String SLASH = "/";
+
+    /**
      * CSVのヘッダー情報を取得します。
      *
-     *  @return CSVヘッダー
+     * @return CSVヘッダー
      */
     public abstract String csvHeader();
 
     /**
-     *
      * 1行単位のCSVデータを取得します。
      *
      * @return CSVデータ

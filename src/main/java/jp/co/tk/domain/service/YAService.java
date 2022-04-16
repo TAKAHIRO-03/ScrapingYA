@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -116,10 +115,10 @@ public class YAService {
             Files.createDirectory(filePath);
         }
 
-        for (final Product p : seller.getProduct()) {
+        for (final var p : seller.getProduct()) {
             final var yap = (YAProduct) p;
             final var imgUrls = yap.getImageUrl();
-            for (final URL url : imgUrls) {
+            for (final var url : imgUrls) {
                 final var imgBinaryData = this.repo.fetchProductImgData(url);
                 Thread.sleep(sleepSecond);
                 try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData);) {
