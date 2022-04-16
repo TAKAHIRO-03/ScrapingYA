@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 
 /**
  * ヤフオクをスクレイピングした際のデータを保持するクラスです。
@@ -23,37 +23,32 @@ public class YAProduct extends Product {
     /**
      * IDとカテゴリ
      */
-    IdAndCategory idAndCategory;
+    private IdAndCategory idAndCategory;
 
     /**
      * タイトル
      */
-    String title;
+    private String title;
 
     /**
      * 説明
      */
-    String description;
+    private String description;
 
     /**
      * 開始価格
      */
-    Long startingPrice;
+    private Long startingPrice;
 
     /**
      * 即決価格
      */
-    Long buyoutPrice;
+    private Long buyoutPrice;
 
     /**
      * 画像URL
      */
-    List<URL> imageUrl;
-
-    /**
-     * 画像バイナリーデータ
-     */
-    List<Byte> image;
+    private Set<URL> imageUrl;
 
     /**
      * {@inheritDoc}

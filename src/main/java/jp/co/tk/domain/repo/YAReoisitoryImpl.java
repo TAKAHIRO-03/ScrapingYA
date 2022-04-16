@@ -1,21 +1,18 @@
 package jp.co.tk.domain.repo;
 
-import jp.co.tk.domain.model.Product;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * ヤフオクより商品を取得します。
  */
 @Slf4j
 @Repository
-public class YAReoisitoryImpl implements WebContentRepository<Product> {
+public class YAReoisitoryImpl implements WebContentRepository {
 
     /**
      * 出品者のベースURLを表します。
@@ -25,7 +22,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product> {
     /**
      * 商品のベースURLを表します。
      */
-    private final static String PRODUCT_URL = "https://page.auctions.yahoo.co.jp";
+    private final static String PRODUCT_URL = "https://page.auctions.yahoo.co.jp/jp/auction";
 
     /**
      * 出品者ページのクエリパラメーターのオフセットのキーを表します。
@@ -47,8 +44,10 @@ public class YAReoisitoryImpl implements WebContentRepository<Product> {
      * {@inheritDoc}
      */
     @Override
-    public Product fetchByProductId(final String productId) {
-        return null;
+    public Document fetchByProductId(final String productId) throws IOException {
+        final var userAgent = getRandomUserAgent();
+        final var url = createUrlAsStr(productId);
+        return Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
     }
 
     /**
@@ -56,17 +55,9 @@ public class YAReoisitoryImpl implements WebContentRepository<Product> {
      */
     @Override
     public Document fetchProductNameListPageBySeller(final String seller, final int limit, final int offset) throws IOException {
-
         final var userAgent = getRandomUserAgent();
         final var url = createUrlAsStr(seller, limit, offset);
-        final var document = Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
-
-        final var documentAsStr = document.getElementsByTag("a").stream()
-                .map(x -> x.getElementsByAttribute("data-auction-id").attr("data-auction-id"))
-                .filter(x -> StringUtils.isNotBlank(x))
-                .collect(Collectors.toSet());
-
-        return document;
+        return Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
     }
 
     /**
@@ -113,6 +104,25 @@ public class YAReoisitoryImpl implements WebContentRepository<Product> {
         sb.append(EQUAL);
         sb.append(limit);
 
+        final var url = sb.toString();
+        log.debug("url=".concat(url));
+
+        return url;
+    }
+
+
+    /**
+     * 商品ページのURLを作成します。
+     *
+     * @param auctionId 出品者
+     * @return URL
+     */
+    String createUrlAsStr(final String auctionId) {
+
+        final var sb = new StringBuilder();
+        sb.append(PRODUCT_URL);
+        sb.append(SLASH);
+        sb.append(auctionId);
         final var url = sb.toString();
         log.debug("url=".concat(url));
 
