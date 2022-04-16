@@ -3,7 +3,7 @@ package jp.co.tk.domain;
 import jp.co.tk.domain.model.Product;
 import jp.co.tk.domain.model.Seller;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * SellerのCSVファイルを生成します。
@@ -16,7 +16,7 @@ public class CsvCreateSeller extends Seller implements CsvCreator {
      * @param name    出品者名
      * @param product 商品
      */
-    public CsvCreateSeller(final String name, final List<Product> product) {
+    public CsvCreateSeller(final String name, final Set<Product> product) {
         super(name, product);
     }
 

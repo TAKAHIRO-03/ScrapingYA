@@ -8,7 +8,7 @@ import java.util.Random;
 /**
  * Webサイトにリクエストを送信し、HTML等の情報を取得するIFを定義します。
  */
-public interface WebContentRepository<T> {
+public interface WebContentRepository {
 
     /**
      * Webページにリクエストする際のユーザーエージェントを定義します。
@@ -46,7 +46,7 @@ public interface WebContentRepository<T> {
      * @param productId
      * @return 実装基で定義したクラス
      */
-    T fetchByProductId(String productId);
+    Document fetchByProductId(String productId) throws IOException;
 
     /**
      * URLを基に、Webコンテンツを取得します。

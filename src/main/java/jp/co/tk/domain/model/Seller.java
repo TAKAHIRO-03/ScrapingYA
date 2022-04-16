@@ -1,8 +1,11 @@
 package jp.co.tk.domain.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -22,6 +25,6 @@ public class Seller {
     /**
      * 商品を表すフィールドです。
      */
-    private final List<Product> product;
+    private final Set<Product> product;
 
 }
