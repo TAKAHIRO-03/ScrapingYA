@@ -1,18 +1,26 @@
 package jp.co.tk.domain.repo;
 
+import jp.co.tk.domain.model.Product;
+import jp.co.tk.domain.model.YAProduct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * ヤフオクより商品を取得します。
  */
 @Slf4j
 @Repository
-public class YAReoisitoryImpl implements WebContentRepository {
+public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct.IdAndCategory> {
 
     /**
      * 出品者のベースURLを表します。
@@ -39,25 +47,108 @@ public class YAReoisitoryImpl implements WebContentRepository {
      */
     private final static String LIMIT_KEY = "n";
 
+    /**
+     * data-auction-id属性を抜き出すためのキーです。
+     */
+    private final static String AUCTION_ID = "data-auction-id";
 
     /**
-     * {@inheritDoc}
+     * data-auction-category属性を抜き出すためのキーです。
+     */
+    private final static String AUCTION_CATEGORY = "data-auction-category";
+
+    /**
+     * タイトルを抜き出すためのHTMLクラス名です。
+     */
+    private final static String TITLE_CLASS = "ProductTitle__text";
+
+    /**
+     * 説明を抜き出すためのHTMLクラス名です。
+     */
+    private final static String STARTING_PRICE_CLASS = "ProductDetail__description";
+
+    /**
+     * 開始価格を抜き出すためのHTMLクラス名です。
+     */
+    private final static String BUYNOW_PRICE_CLASS = "Price--buynow";
+
+    /**
+     * イメージURLを抜き出すためのHTMLクラス名です。
+     */
+    private final static String IMG_CLASS = "ProductImage__image";
+
+    /**
+     * 正規表現で使用する円です。
+     */
+    private final static String REGEX_YEN = "円";
+
+    /**
+     * 正規表現で使用する数値以外を表す文字です。
+     */
+    private final static String REGEX_NON_NUM = "\\D";
+
+    /**
+     * @param idAndCategory
+     * @return
+     * @throws IOException
      */
     @Override
-    public Document fetchByProductId(final String productId) throws IOException {
+    public Product fetchByProductId(final YAProduct.IdAndCategory idAndCategory) throws IOException {
         final var userAgent = getRandomUserAgent();
-        final var url = createUrlAsStr(productId);
-        return Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
+        final var url = createUrlAsStr(idAndCategory.getId());
+        final var document = Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
+
+        final var title = document.getElementsByClass(TITLE_CLASS).text();
+        final var description = document.getElementsByClass("ProductExplanation__commentArea").tagName("table").text();
+        final var startingPrice = document.getElementsByClass(STARTING_PRICE_CLASS).tagName(SPAN_TAG).eachText().get(9);
+        final var buyoutPrice = document.getElementsByClass(BUYNOW_PRICE_CLASS).text();
+        final var imgIterator = document.getElementsByClass(IMG_CLASS).tagName(IMG_TAG).iterator();
+        final var imgUrls = new HashSet<URL>();
+        while (imgIterator.hasNext()) {
+            final var p = imgIterator.next();
+            final var imgs = p.getElementsByTag(IMG_TAG);
+            for (final Element e : imgs) {
+                final var urlAsStr = e.absUrl(SRC_ATTR);
+                if (StringUtils.isNotBlank(urlAsStr)) {
+                    final var imgUrl = new URL(urlAsStr);
+                    imgUrls.add(imgUrl);
+                }
+            }
+        }
+
+        final YAProduct product = YAProduct.builder()
+                .idAndCategory(idAndCategory)
+                .title(title)
+                .description(description)
+                .startingPrice(convertToNum(startingPrice))
+                .buyoutPrice(convertToNum(buyoutPrice))
+                .imageUrl(imgUrls)
+                .build();
+
+        return product;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Document fetchProductNameListPageBySeller(final String seller, final int limit, final int offset) throws IOException {
+    public Set<YAProduct.IdAndCategory> fetchProductNameListPageBySeller(final String seller, final int limit, final int offset) throws IOException {
         final var userAgent = getRandomUserAgent();
         final var url = createUrlAsStr(seller, limit, offset);
-        return Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
+        final var document = Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
+        final var idAndCategorySet = document.getElementsByTag(A_TAG).stream()
+                .map(x -> {
+                    final String id = x.getElementsByAttribute(AUCTION_ID).attr(AUCTION_ID);
+                    final String category = x.getElementsByAttribute(AUCTION_ID).attr(AUCTION_CATEGORY);
+                    if (StringUtils.isBlank(id) || StringUtils.isBlank(category)) {
+                        return null;
+                    }
+                    return new YAProduct.IdAndCategory(id, category);
+                })
+                .filter(x -> Objects.nonNull(x))
+                .collect(Collectors.toSet());
+
+        return idAndCategorySet;
     }
 
     /**
@@ -127,6 +218,18 @@ public class YAReoisitoryImpl implements WebContentRepository {
         log.debug("url=".concat(url));
 
         return url;
+    }
+
+    /**
+     * ヤフオクから取得した価格を数値だけ抜き取ります。
+     *
+     * @param target
+     * @return 数値
+     */
+    Long convertToNum(final String target) {
+        int index = target.indexOf(REGEX_YEN);
+        String startUntilYen = target.substring(0, index);
+        return Long.valueOf(startUntilYen.replaceAll(REGEX_NON_NUM, BLANK));
     }
 
 }

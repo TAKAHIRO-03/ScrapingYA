@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * SellerのCSVファイルを生成します。
  */
-public class CsvCreateSeller extends Seller implements CsvCreator {
+public class CsvCreateWithSeller extends Seller implements CsvCreator {
 
     /**
      * コンストラクタを定義しています。
@@ -16,7 +16,7 @@ public class CsvCreateSeller extends Seller implements CsvCreator {
      * @param name    出品者名
      * @param product 商品
      */
-    public CsvCreateSeller(final String name, final Set<Product> product) {
+    public CsvCreateWithSeller(final String name, final Set<Product> product) {
         super(name, product);
     }
 
