@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -33,7 +35,8 @@ public class YAServiceTest {
     @Test
     public void 画像を生成することが出来るか() throws Exception {
         var seller = this.serv.findSellerBySellerName("tomomooo0716", 5);
-        this.serv.generateImg("./out/".concat(seller.getName()), seller);
+        var result = this.serv.generateImg("./out/".concat(seller.getName()), seller);
+        CompletableFuture.completedFuture(result);
     }
 
 }
