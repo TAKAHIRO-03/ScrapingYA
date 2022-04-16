@@ -65,6 +65,21 @@ public interface WebContentRepository<T, U> {
     String BLANK = "";
 
     /**
+     * selectタグを表す文字です。
+     */
+    String SELECT_TAG = "select";
+
+    /**
+     * optionタグを表す文字です。
+     */
+    String OPTION_TAG = "option";
+
+    /**
+     * 半角スペースを表す文字です。
+     */
+    String SPCAE = " ";
+
+    /**
      * Webコンテンツを取得します。
      *
      * @param productId
@@ -98,7 +113,7 @@ public interface WebContentRepository<T, U> {
      * @param seller 出品者
      * @return 商品数
      */
-    int fetchTotalNumberOfProducts(final String seller);
+    int fetchTotalNumberOfProducts(final String seller) throws IOException;
 
 
     /**
