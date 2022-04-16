@@ -1,6 +1,7 @@
 package jp.co.tk.domain.model;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.net.URL;
@@ -11,6 +12,7 @@ import java.util.List;
  */
 @Builder
 @Value
+@EqualsAndHashCode(of = "id")
 public class YAProduct extends Product {
 
     /**
@@ -19,14 +21,9 @@ public class YAProduct extends Product {
     public static final String CSV_HEADER = "カテゴリ,タイトル,説明,開始価格,即決価格,画像1,画像2,画像3,画像4,画像5,画像6,画像7,画像8,画像9,画像10";
 
     /**
-     * プロダクトID
+     * IDとカテゴリ
      */
-    String id;
-
-    /**
-     * カテゴリ
-     */
-    String category;
+    IdAndCategory idAndCategory;
 
     /**
      * タイトル
@@ -73,4 +70,23 @@ public class YAProduct extends Product {
     public String csvData() {
         return null;
     }
+
+    /**
+     * IDとカテゴリを保持するインナークラスです。
+     */
+    @Value
+    public static class IdAndCategory {
+
+        /**
+         * プロダクトID
+         */
+        String id;
+
+        /**
+         * カテゴリ
+         */
+        String category;
+
+    }
+
 }
