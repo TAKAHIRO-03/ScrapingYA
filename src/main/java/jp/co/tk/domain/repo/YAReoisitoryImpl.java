@@ -2,6 +2,7 @@ package jp.co.tk.domain.repo;
 
 import jp.co.tk.domain.model.Product;
 import jp.co.tk.domain.model.YAProduct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct.IdAndCategory> {
 
     /**
@@ -161,8 +163,9 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
      * {@inheritDoc}
      */
     @Override
-    public byte[] fetchProductImgData() {
-        return new byte[0];
+    public byte[] fetchProductImgData(final URL url) throws IOException {
+        final var userAgent = getRandomUserAgent();
+        return Jsoup.connect(url.toString()).userAgent(userAgent).timeout(60000).ignoreContentType(true).execute().bodyAsBytes();
     }
 
     /**
@@ -175,6 +178,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
         final var urlBlr = new StringBuilder(SELLER_URL);
         urlBlr.append(SLASH);
         urlBlr.append(seller);
+        log.debug(urlBlr.toString());
         final var document = Jsoup.connect(urlBlr.toString()).userAgent(userAgent).timeout(60000).get();
         final var elementsWithTotal = document.getElementsByClass(PU_CLASS).tagName(SELECT_TAG).tagName(OPTION_TAG).eachText();
         final int total;

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +67,14 @@ public class YAReoisitoryImplTest {
         Thread.sleep(500);
         var actual = this.repo.fetchTotalNumberOfProducts("tomomooo0716");
         assertThat(actual).isEqualTo(5);
+    }
+
+    @Test
+    public void 画像データをバイナリで取得する() throws Exception {
+        final String urlAsStr = "https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0304/users/db78dcdb3b6b11c522fb507729f2f1b712ce01df/i-img600x600-16500834183vqiii49430.jpg";
+        var actual = this.repo.fetchProductImgData(new URL(urlAsStr));
+
+        assertThat(actual).isNotNull();
     }
 
 }

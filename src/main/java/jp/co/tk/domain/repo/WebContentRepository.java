@@ -1,6 +1,7 @@
 package jp.co.tk.domain.repo;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Random;
 import java.util.Set;
 
@@ -104,7 +105,7 @@ public interface WebContentRepository<T, U> {
      *
      * @return バイナリデータ
      */
-    byte[] fetchProductImgData();
+    byte[] fetchProductImgData(final URL url) throws IOException;
 
 
     /**
