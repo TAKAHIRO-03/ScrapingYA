@@ -22,7 +22,7 @@ public class CsvCreatorServiceTest {
 
     @Test
     public void CSVが生成出来るか() throws Exception {
-        var seller = this.yaServ.findSellerBySellerName("tomomooo0716", 5);
+        var seller = this.yaServ.findSellerBySellerName("tomomooo0716", 5, 0);
         var result = csvServ.create(seller);
         CompletableFuture.completedFuture(result);
     }
