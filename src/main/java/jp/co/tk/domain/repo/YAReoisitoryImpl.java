@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -76,6 +77,11 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
      * イメージURLを抜き出すためのHTMLクラス名です。
      */
     private final static String IMG_CLASS = "ProductImage__image";
+
+    /**
+     * 合計値を抜き出すためのHTMLクラス名です。
+     */
+    private final static String PU_CLASS = "pu";
 
     /**
      * 正規表現で使用する円です。
@@ -163,8 +169,23 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
      * {@inheritDoc}
      */
     @Override
-    public int fetchTotalNumberOfProducts(final String seller) {
-        return 0;
+    public int fetchTotalNumberOfProducts(final String seller) throws IOException {
+
+        final var userAgent = getRandomUserAgent();
+        final var urlBlr = new StringBuilder(SELLER_URL);
+        urlBlr.append(SLASH);
+        urlBlr.append(seller);
+        final var document = Jsoup.connect(urlBlr.toString()).userAgent(userAgent).timeout(60000).get();
+        final var elementsWithTotal = document.getElementsByClass(PU_CLASS).tagName(SELECT_TAG).tagName(OPTION_TAG).eachText();
+        final int total;
+        if (!CollectionUtils.isEmpty(elementsWithTotal)) {
+            final String[] splitedSpaceAry = elementsWithTotal.get(0).split(SPCAE);
+            total = Integer.valueOf(splitedSpaceAry[0].replaceAll(REGEX_NON_NUM, BLANK));
+        } else {
+            total = 0;
+        }
+
+        return total;
     }
 
 

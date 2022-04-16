@@ -61,4 +61,11 @@ public class YAReoisitoryImplTest {
         assertThat(actual).isNotNull();
     }
 
+    @Test
+    public void 商品の合計数を取得する() throws Exception {
+        Thread.sleep(500);
+        var actual = this.repo.fetchTotalNumberOfProducts("tomomooo0716");
+        assertThat(actual).isEqualTo(5);
+    }
+
 }
