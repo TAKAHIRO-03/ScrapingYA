@@ -81,6 +81,11 @@ public interface WebContentRepository<T, U> {
     String SPCAE = " ";
 
     /**
+     * テーブルタグを表す文字です。
+     */
+    String TABLE = "table";
+
+    /**
      * Webコンテンツを取得します。
      *
      * @param productId

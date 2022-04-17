@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct.IdAndCategory> {
+public class YARepositoryImpl implements WebContentRepository<Product, YAProduct.IdAndCategory> {
 
     /**
      * 出品者のベースURLを表します。
@@ -71,6 +71,11 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
     private final static String STARTING_PRICE_CLASS = "ProductDetail__description";
 
     /**
+     * 説明文を抜き出すためのHTMLクラス名です。
+     */
+    private final static String DESCRIPTION_CLASS = "ProductExplanation__commentArea";
+
+    /**
      * 開始価格を抜き出すためのHTMLクラス名です。
      */
     private final static String BUYNOW_PRICE_CLASS = "Price--buynow";
@@ -88,7 +93,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
     /**
      * 正規表現で使用する円です。
      */
-    private final static String REGEX_YEN = "円";
+    private final static String YEN = "円";
 
     /**
      * 正規表現で使用する数値以外を表す文字です。
@@ -107,8 +112,17 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
         final var document = Jsoup.connect(url).userAgent(userAgent).timeout(60000).get();
 
         final var title = document.getElementsByClass(TITLE_CLASS).text();
-        final var description = document.getElementsByClass("ProductExplanation__commentArea").tagName("table").text();
-        final var startingPrice = document.getElementsByClass(STARTING_PRICE_CLASS).tagName(SPAN_TAG).eachText().get(9);
+        final var description = document.getElementsByClass(DESCRIPTION_CLASS).tagName(TABLE).text();
+
+        String startingPriceTmp = null;
+        try {
+            startingPriceTmp = document.getElementsByClass(STARTING_PRICE_CLASS).tagName(SPAN_TAG).eachText().get(9);
+        } catch (final IndexOutOfBoundsException e) {
+            log.error("Catch YARepositoryImpl.fetchByProductId", e);
+            startingPriceTmp = "0".concat(YEN);
+        }
+
+        final String startingPrice = startingPriceTmp;
         final var buyoutPrice = document.getElementsByClass(BUYNOW_PRICE_CLASS).text();
         final var imgIterator = document.getElementsByClass(IMG_CLASS).tagName(IMG_TAG).iterator();
         final var imgUrls = new HashSet<URL>();
@@ -153,7 +167,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
                     }
                     return new YAProduct.IdAndCategory(id, category);
                 })
-                .filter(x -> Objects.nonNull(x))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
         return idAndCategorySet;
@@ -178,7 +192,7 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
         final var urlBlr = new StringBuilder(SELLER_URL);
         urlBlr.append(SLASH);
         urlBlr.append(seller);
-        log.debug(urlBlr.toString());
+        log.debug("url=".concat(urlBlr.toString()));
         final var document = Jsoup.connect(urlBlr.toString()).userAgent(userAgent).timeout(60000).get();
         final var elementsWithTotal = document.getElementsByClass(PU_CLASS).tagName(SELECT_TAG).tagName(OPTION_TAG).eachText();
         final int total;
@@ -252,8 +266,8 @@ public class YAReoisitoryImpl implements WebContentRepository<Product, YAProduct
      * @return 数値
      */
     Long convertToNum(final String target) {
-        int index = target.indexOf(REGEX_YEN);
-        String startUntilYen = target.substring(0, index);
+        final int index = target.indexOf(YEN);
+        final String startUntilYen = target.substring(0, index);
         return Long.valueOf(startUntilYen.replaceAll(REGEX_NON_NUM, BLANK));
     }
 

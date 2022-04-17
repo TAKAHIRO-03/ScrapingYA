@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 @Service
-public class CsvCreatorService {
+public class CsvService {
 
     /**
      * 文字コード
@@ -43,12 +43,22 @@ public class CsvCreatorService {
     /**
      * csvの拡張子
      */
-    private static final String EXSTENSION = ".csv";
+    private static final String EXTENSION = ".csv";
 
     /**
      * 改行コード
      */
     private static final String LF = "\r\n";
+
+    /**
+     * 出品者のファイルパス
+     */
+    private final static String SELLER_PATH = "./in/seller.csv";
+
+    /**
+     * カンマを表すフィールドです。
+     */
+    private final static String COMMA = ",";
 
     /**
      * 出品者情報を基にCSVファイルを生成します。
@@ -66,13 +76,7 @@ public class CsvCreatorService {
         fileBlr.append(seller.getName());
         fileBlr.append(HYPHEN);
         fileBlr.append(System.currentTimeMillis());
-        fileBlr.append(EXSTENSION);
-
-        final String baseDirWithSellerName = BASE_DIR.concat(SLASH).concat(seller.getName());
-        final Path filePath = Paths.get(baseDirWithSellerName);
-        if (!Files.exists(filePath)) {
-            Files.createDirectory(filePath);
-        }
+        fileBlr.append(EXTENSION);
 
         try (final var fw = new FileWriter(fileBlr.toString(), Charset.forName(CSV_CHARSET))) {
             var isFirst = true;
@@ -89,6 +93,17 @@ public class CsvCreatorService {
         log.debug("generate csv. path=".concat(fileBlr.toString()));
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    /**
+     * 出品者のリストを取得します。
+     *
+     * @return 出品者リスト
+     * @throws IOException
+     */
+    public String[] readSellerList() throws IOException {
+        final Path file = Paths.get(SELLER_PATH);
+        return Files.readString(file, Charset.forName(CSV_CHARSET)).split(COMMA);
     }
 
 }

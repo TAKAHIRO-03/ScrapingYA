@@ -19,6 +19,10 @@
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ALL"/>
     </logger>
+    <logger name="org.jsoup.Jsoup" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ALL"/>
+    </logger>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ALL"/>

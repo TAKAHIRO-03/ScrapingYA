@@ -24,8 +24,8 @@ public class JavaConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setQueueCapacity(3);
+        executor.setMaxPoolSize(10);
         executor.setThreadNamePrefix("GenImgThread-");
-        executor.initialize();
         return executor;
     }
 
@@ -39,8 +39,8 @@ public class JavaConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setQueueCapacity(3);
+        executor.setMaxPoolSize(10);
         executor.setThreadNamePrefix("GenCsvThread-");
-        executor.initialize();
         return executor;
     }
 

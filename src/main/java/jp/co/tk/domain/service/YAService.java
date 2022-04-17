@@ -3,7 +3,7 @@ package jp.co.tk.domain.service;
 import jp.co.tk.domain.model.Product;
 import jp.co.tk.domain.model.Seller;
 import jp.co.tk.domain.model.YAProduct;
-import jp.co.tk.domain.repo.YAReoisitoryImpl;
+import jp.co.tk.domain.repo.YARepositoryImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -14,9 +14,6 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,12 +28,12 @@ public class YAService {
     /**
      * ヤフオクからデータを取得するクラスです。
      */
-    private final YAReoisitoryImpl repo;
+    private final YARepositoryImpl repo;
 
     /**
      * ヤフオクにリクエストを送る際のスリープ時間を表します。
      */
-    private final int sleepMillSecond = 1500;
+    private final int sleepMillSecond = 2000;
 
     /**
      * ヤフオクから１回に何件の情報を取得するかを表します。
@@ -115,11 +112,6 @@ public class YAService {
         }
 
         final String dirName = BASE_OUT_DIR.concat(seller.getName());
-        final Path filePath = Paths.get(dirName);
-        if (!Files.exists(filePath)) {
-            Files.createDirectory(filePath);
-        }
-
         for (final var p : seller.getProduct()) {
             final var yap = (YAProduct) p;
             final var imgUrls = yap.getImageUrl();
@@ -127,9 +119,9 @@ public class YAService {
                 final var imgBinaryData = this.repo.fetchProductImgData(url);
                 log.debug("url=".concat(url.toString()));
                 Thread.sleep(sleepMillSecond);
-                try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData);) {
+                try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData)) {
                     final var image = ImageIO.read(bis);
-                    EXTENSION_LIST.stream().forEach(extension -> {
+                    EXTENSION_LIST.forEach(extension -> {
                         if (url.toString().endsWith(extension)) {
                             final String[] urlSplitedWithSlash = url.toString().split(SLASH);
                             final String fileName = urlSplitedWithSlash[urlSplitedWithSlash.length - 1];
@@ -139,7 +131,7 @@ public class YAService {
                             } catch (IOException e) {
                                 log.error("Catch YAService.generateImg. url=".concat(url.toString()), e);
                             } finally {
-                                log.debug("Generated imgPath=".concat(path));
+                                log.debug("Generated img. imgPath=".concat(path));
                             }
                         }
                     });
