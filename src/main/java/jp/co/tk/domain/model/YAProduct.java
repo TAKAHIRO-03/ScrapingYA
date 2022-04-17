@@ -23,32 +23,32 @@ public class YAProduct extends Product {
     /**
      * IDとカテゴリ
      */
-    private IdAndCategory idAndCategory;
+    IdAndCategory idAndCategory;
 
     /**
      * タイトル
      */
-    private String title;
+    String title;
 
     /**
      * 説明
      */
-    private String description;
+    String description;
 
     /**
      * 開始価格
      */
-    private Long startingPrice;
+    Long startingPrice;
 
     /**
      * 即決価格
      */
-    private Long buyoutPrice;
+    Long buyoutPrice;
 
     /**
      * 画像URL
      */
-    private Set<URL> imageUrl;
+    Set<URL> imageUrl;
 
     /**
      * {@inheritDoc}
@@ -84,7 +84,7 @@ public class YAProduct extends Product {
             sb.append(fileName);
             sb.append(COMMA);
         }
-        for(int i = 0, max = 10 - imgUrlLen; i < max; i++) {
+        for (int i = 0, max = 10 - imgUrlLen; i < max; i++) {
             sb.append(COMMA);
         }
 

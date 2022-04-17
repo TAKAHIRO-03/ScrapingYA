@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SpringJUnitConfig(YAReoisitoryImplTest.Config.class)
-public class YAReoisitoryImplTest {
+@SpringJUnitConfig(YARepositoryImplTest.Config.class)
+public class YARepositoryImplTest {
 
     @Autowired
-    private YAReoisitoryImpl repo;
+    private YARepositoryImpl repo;
 
     @ComponentScan("jp.co.tk.domain")
     static class Config {

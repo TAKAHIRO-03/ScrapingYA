@@ -1,6 +1,6 @@
 package jp.co.tk;
 
-import jp.co.tk.domain.service.CsvCreatorService;
+import jp.co.tk.domain.service.CsvService;
 import jp.co.tk.domain.service.YAService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +9,11 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.nio.charset.Charset;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -33,21 +34,6 @@ public class App implements ApplicationRunner {
     }
 
     /**
-     * 文字コード
-     */
-    private static final String CSV_CHARSET = "Shift-JIS";
-
-    /**
-     * 出品者のファイルパス
-     */
-    private final static String SELLER_PATH = "./in/seller.csv";
-
-    /**
-     * カンマを表すフィールドです。
-     */
-    private final static String COMMA = ",";
-
-    /**
      * ヤフオフからデータを取得するなどの処理を提供します。
      */
     private final YAService yaServ;
@@ -55,12 +41,17 @@ public class App implements ApplicationRunner {
     /**
      * CSVファイルを生成する処理を提供します。
      */
-    private final CsvCreatorService csvCreatorServ;
+    private final CsvService csvServ;
 
     /**
-     * 出品者の情報を1回で取得することが出来る商品数
+     * ディレクトリ名
      */
-    private final int MAX_FETCH_DATA = 500;
+    private static final String BASE_DIR = "./out";
+
+    /**
+     * スラッシュ
+     */
+    private static final String SLASH = "/";
 
     /**
      * Appが実行されたとき最初に呼ばれる関数です。
@@ -71,30 +62,29 @@ public class App implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        final Path file = Paths.get(SELLER_PATH);
-        final String sellerAsStrAry[] = Files.readString(file, Charset.forName(CSV_CHARSET)).split(COMMA);
+        final var sellerAsStrAry = this.csvServ.readSellerList();
 
-        CompletableFuture<Void> imgFuture = null;
-        CompletableFuture<Void> csvFuture = null;
+        final var futureResults = new ArrayList<CompletableFuture<Void>>();
         for (final var sellerAsStr : sellerAsStrAry) {
 
             final var trimedSellerAsStr = sellerAsStr.trim();
             final var total = this.yaServ.count(trimedSellerAsStr);
-            if (500 < total) {
-                final var offset = Math.ceil(total / MAX_FETCH_DATA);
-                for (int i = 0; i < offset; i++) {
-                    var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, MAX_FETCH_DATA, MAX_FETCH_DATA);
-                    csvFuture = this.csvCreatorServ.create(seller);
-                    imgFuture = this.yaServ.generateImg(seller);
-                }
-                continue;
-            }
 
-            var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, total, 0);
-            csvFuture = this.csvCreatorServ.create(seller);
-            imgFuture = this.yaServ.generateImg(seller);
+            try {
+                var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, total, 0);
+                final String baseDirWithSellerName = BASE_DIR.concat(SLASH).concat(seller.getName());
+                final Path filePath = Paths.get(baseDirWithSellerName);
+                if (!Files.exists(filePath)) {
+                    Files.createDirectory(filePath);
+                }
+                futureResults.add(this.csvServ.create(seller));
+                futureResults.add(this.yaServ.generateImg(seller));
+            } catch (final IOException | InterruptedException e) {
+                log.error("Catch App.run. seller=".concat(trimedSellerAsStr));
+            }
         }
-        CompletableFuture.allOf(imgFuture, csvFuture);
+        final var futureResultsAry = futureResults.toArray(new CompletableFuture[futureResults.size()]);
+        CompletableFuture.allOf(futureResultsAry).join();
 
         log.debug("finish.");
     }
