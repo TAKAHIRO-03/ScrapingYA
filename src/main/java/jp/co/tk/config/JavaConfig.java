@@ -1,5 +1,6 @@
 package jp.co.tk.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -42,6 +43,16 @@ public class JavaConfig {
         executor.setMaxPoolSize(10);
         executor.setThreadNamePrefix("GenCsvThread-");
         return executor;
+    }
+
+    /**
+     * Beanをコピーオブジェクトを返却します。
+     *
+     * @return ModelMapper
+     */
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 
 }

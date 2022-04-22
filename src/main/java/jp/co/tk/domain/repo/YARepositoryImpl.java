@@ -4,6 +4,7 @@ import jp.co.tk.domain.model.Product;
 import jp.co.tk.domain.model.YAProduct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -179,7 +180,9 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
     @Override
     public byte[] fetchProductImgData(final URL url) throws IOException {
         final var userAgent = getRandomUserAgent();
-        return Jsoup.connect(url.toString()).userAgent(userAgent).timeout(60000).ignoreContentType(true).execute().bodyAsBytes();
+        final var binaryData = Jsoup.connect(url.toString()).userAgent(userAgent).timeout(60000).ignoreContentType(true).execute().bodyAsBytes();
+        log.debug("url=".concat(url.toString()));
+        return binaryData;
     }
 
     /**
@@ -198,7 +201,7 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
         final int total;
         if (!CollectionUtils.isEmpty(elementsWithTotal)) {
             final String[] splitedSpaceAry = elementsWithTotal.get(0).split(SPCAE);
-            total = Integer.valueOf(splitedSpaceAry[0].replaceAll(REGEX_NON_NUM, BLANK));
+            total = Integer.valueOf(RegExUtils.replaceAll(splitedSpaceAry[0], REGEX_NON_NUM, BLANK));
         } else {
             total = 0;
         }
