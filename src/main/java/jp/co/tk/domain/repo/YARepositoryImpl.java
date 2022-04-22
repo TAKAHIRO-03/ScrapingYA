@@ -187,9 +187,11 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public long fetchTotalNumberOfProducts(final String seller) throws IOException {
+    public int fetchTotalNumberOfProducts(final String seller) throws IOException {
 
         final var userAgent = getRandomUserAgent();
         final var urlBlr = new StringBuilder(SELLER_URL);
@@ -231,7 +233,7 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
         sb.append(AND);
         sb.append(OFFSET_KEY);
         sb.append(EQUAL);
-        sb.append(Math.max(offset, 1));
+        sb.append(offset + 1);
         sb.append(AND);
         sb.append(LIMIT_KEY);
         sb.append(EQUAL);

@@ -21,7 +21,7 @@ public interface WebContentRepository<T, U> {
     };
 
     /**
-     * 以下、クエリパラーメーターを作成する際にしようする文字列です。
+     * スラッシュ
      */
     String SLASH = "/";
 
@@ -119,7 +119,7 @@ public interface WebContentRepository<T, U> {
      * @param seller 出品者
      * @return 商品数
      */
-    long fetchTotalNumberOfProducts(final String seller) throws IOException;
+    int fetchTotalNumberOfProducts(final String seller) throws IOException;
 
 
     /**
