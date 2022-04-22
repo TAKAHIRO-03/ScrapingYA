@@ -56,6 +56,12 @@ public class YAService {
     private final static String BASE_OUT_DIR = "./out/";
 
     /**
+     * ハイフン
+     */
+    private final static String HYPHEN = "-";
+
+
+    /**
      * 出品者に紐づく、商品の個数を返却します。
      *
      * @param seller
@@ -81,15 +87,20 @@ public class YAService {
             return new Seller(seller, Collections.emptySet());
         }
 
-        final var offsetNum = Math.max(Math.ceil(total / limit), 1);
+        final var offsetNum = Math.max(Math.ceil((double) total / (double) limit), 1.0);
         final var products = new HashSet<Product>();
         for (int i = 0; i < offsetNum; i++) {
             final Set<YAProduct.IdAndCategory> idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, limit, i * limit + offsetFromTotal);
             Thread.sleep(sleepMillSecond);
             for (final YAProduct.IdAndCategory id : idAndCategory) {
-                final Product product = this.repo.fetchByProductId(id);
-                products.add(product);
-                Thread.sleep(sleepMillSecond);
+                try {
+                    final Product product = this.repo.fetchByProductId(id);
+                    products.add(product);
+                } catch (final IOException e) {
+                    log.error("Catch YAService.findSellerBySellerName. id=".concat(id.toString()), e);
+                } finally {
+                    Thread.sleep(sleepMillSecond);
+                }
             }
         }
 
@@ -111,36 +122,51 @@ public class YAService {
             return CompletableFuture.completedFuture(null);
         }
 
-        final String dirName = BASE_OUT_DIR.concat(seller.getName());
         for (final var p : seller.getProduct()) {
             final var yap = (YAProduct) p;
-            final var imgUrls = yap.getImageUrl();
-            for (final var url : imgUrls) {
-                final var imgBinaryData = this.repo.fetchProductImgData(url);
-                log.debug("url=".concat(url.toString()));
-                Thread.sleep(sleepMillSecond);
-                try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData)) {
-                    final var image = ImageIO.read(bis);
-                    EXTENSION_LIST.forEach(extension -> {
-                        if (url.toString().endsWith(extension)) {
-                            final String[] urlSplitedWithSlash = url.toString().split(SLASH);
-                            final String fileName = urlSplitedWithSlash[urlSplitedWithSlash.length - 1];
-                            final String path = dirName.concat(SLASH).concat(fileName);
-                            try {
-                                ImageIO.write(image, extension, new File(path));
-                            } catch (IOException e) {
-                                log.error("Catch YAService.generateImg. url=".concat(url.toString()), e);
-                            } finally {
-                                log.debug("Generated img. imgPath=".concat(path));
-                            }
-                        }
-                    });
+            final var imgUrls = new ArrayList<>(yap.getImageUrl());
+            final var imgNames = new ArrayList<>(yap.getImageName());
+            for (int i = 0, len = imgUrls.size(); i < len; i++) {
+                final byte[] imgBinaryData;
+                try {
+                    imgBinaryData = this.repo.fetchProductImgData(imgUrls.get(i));
+                } catch (final IOException e) {
+                    log.error("YAService.generateImg.", e);
+                    continue;
+                } finally {
+                    Thread.sleep(sleepMillSecond);
                 }
+                outputImg(imgBinaryData, imgNames.get(i), BASE_OUT_DIR.concat(seller.getName()));
             }
 
         }
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    /**
+     * バイトデータから画像を出力します。
+     *
+     * @param imgBinaryData
+     * @param dirName
+     * @throws IOException
+     */
+    private void outputImg(final byte[] imgBinaryData, final String fileName, final String dirName) throws IOException {
+        try (final ByteArrayInputStream bis = new ByteArrayInputStream(imgBinaryData)) {
+            final var image = ImageIO.read(bis);
+            for (final var extension : EXTENSION_LIST) {
+                if (fileName.endsWith(extension)) {
+                    final var path = dirName.concat(SLASH).concat(fileName);
+                    try {
+                        ImageIO.write(image, extension, new File(path));
+                        log.debug("Generated img. imgPath=".concat(path));
+                    } catch (IOException e) {
+                        log.error("Catch YAService.generateImg. fileName=".concat(fileName), e);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
 }
