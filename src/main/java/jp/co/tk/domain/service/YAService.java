@@ -31,9 +31,9 @@ public class YAService {
     private final YARepositoryImpl repo;
 
     /**
-     * ヤフオクにリクエストを送る際のスリープ時間を表します。
+     * スリープ時間をランダムで取得するためのオブジェクトです。
      */
-    private final int sleepMillSecond = 2000;
+    private final static Random random = new Random();
 
     /**
      * 画像の拡張子のリストを表します。
@@ -73,7 +73,7 @@ public class YAService {
 
         final var products = new HashSet<Product>();
         final Set<YAProduct.IdAndCategory> idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, total, offset);
-        Thread.sleep(sleepMillSecond);
+        Thread.sleep(getSleepTime());
         for (final YAProduct.IdAndCategory id : idAndCategory) {
             try {
                 final Product product = this.repo.fetchByProductId(id);
@@ -81,7 +81,7 @@ public class YAService {
             } catch (final IOException e) {
                 log.error("Catch YAService.findSellerBySellerName. id=".concat(id.toString()), e);
             } finally {
-                Thread.sleep(sleepMillSecond);
+                Thread.sleep(getSleepTime());
             }
         }
 
@@ -115,7 +115,7 @@ public class YAService {
                     log.error("YAService.generateImg.", e);
                     continue;
                 } finally {
-                    Thread.sleep(sleepMillSecond);
+                    Thread.sleep(getSleepTime());
                 }
 
                 outputImg(imgBinaryData, imgNames.get(i), filePath);
@@ -149,6 +149,16 @@ public class YAService {
                 }
             }
         }
+    }
+
+
+    /**
+     * 2000~3000の間の数値を取得します。
+     *
+     * @return 2000~3000
+     */
+    private long getSleepTime() {
+        return random.nextInt(1001) + 2000;
     }
 
 }

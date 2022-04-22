@@ -85,6 +85,7 @@ public class App implements ApplicationRunner {
             final var trimedSellerAsStr = sellerAsStr.trim();
             try {
                 final var total = this.yaServ.count(trimedSellerAsStr);
+                Thread.sleep(2000);
                 final var offset = Math.max(Math.ceil((double) total / (double) LIMIT), 1.0);
                 for (int i = 0; i < offset; i++) {
                     final var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, LIMIT, LIMIT * i);
