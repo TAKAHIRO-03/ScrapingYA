@@ -2,7 +2,6 @@ package jp.co.tk.domain.service;
 
 import jp.co.tk.domain.model.Seller;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.FileWriter;
@@ -11,7 +10,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * CSVファイルするサービスクラスです。
@@ -26,14 +24,9 @@ public class CsvService {
     private static final String CSV_CHARSET = "Shift-JIS";
 
     /**
-     * ディレクトリ名
-     */
-    private static final String BASE_DIR = "./out";
-
-    /**
      * スラッシュ
      */
-    private static final String SLASH = "/";
+    private static final String SLASH = System.getProperty("file.separator");
 
     /**
      * ハイフン
@@ -66,19 +59,15 @@ public class CsvService {
      * @param seller
      * @throws IOException
      */
-    @Async("GenCsvThread")
-    public CompletableFuture<Void> create(final Seller seller) throws IOException {
+    public void create(final Seller seller, final String outputDir) throws IOException {
 
-        final var fileBlr = new StringBuilder(BASE_DIR);
-        fileBlr.append(SLASH);
-        fileBlr.append(seller.getName());
-        fileBlr.append(SLASH);
-        fileBlr.append(seller.getName());
+        final var fileBlr = new StringBuilder(seller.getName());
         fileBlr.append(HYPHEN);
         fileBlr.append(System.currentTimeMillis());
         fileBlr.append(EXTENSION);
 
-        try (final var fw = new FileWriter(fileBlr.toString(), Charset.forName(CSV_CHARSET))) {
+        final var filePath = outputDir.concat(SLASH).concat(fileBlr.toString());
+        try (final var fw = new FileWriter(filePath, Charset.forName(CSV_CHARSET))) {
             var isFirst = true;
             for (final var p : seller.getProduct()) {
                 if (isFirst) {
@@ -90,9 +79,7 @@ public class CsvService {
                 fw.write(LF);
             }
         }
-        log.debug("generate csv. path=".concat(fileBlr.toString()));
-
-        return CompletableFuture.completedFuture(null);
+        log.debug("generate csv. path=".concat(filePath));
     }
 
     /**

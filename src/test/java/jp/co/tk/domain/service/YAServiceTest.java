@@ -35,7 +35,7 @@ public class YAServiceTest {
     @Test
     public void 画像を生成することが出来るか() throws Exception {
         var seller = this.serv.findSellerBySellerName("tomomooo0716", 5, 0);
-        var result = this.serv.generateImg(seller);
+        var result = this.serv.generateImg(seller, "./out/tomomooo0716");
         CompletableFuture.completedFuture(result);
     }
 

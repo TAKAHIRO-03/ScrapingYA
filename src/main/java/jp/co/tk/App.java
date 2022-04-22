@@ -52,12 +52,21 @@ public class App implements ApplicationRunner {
     /**
      * ディレクトリ名
      */
-    private static final String BASE_DIR = "./out";
+    private static final String BASE_DIR;
 
     /**
      * スラッシュ
      */
-    private static final String SLASH = "/";
+    private static final String SLASH = System.getProperty("file.separator");
+
+    /**
+     * CSV出力件数
+     */
+    private static final int LIMIT = 50;
+
+    static {
+        BASE_DIR = ".".concat(SLASH).concat("out");
+    }
 
     /**
      * Appが実行されたとき最初に呼ばれる関数です。
@@ -76,14 +85,17 @@ public class App implements ApplicationRunner {
             final var trimedSellerAsStr = sellerAsStr.trim();
             try {
                 final var total = this.yaServ.count(trimedSellerAsStr);
-                final var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, total, 0);
-                final var baseDirWithSellerName = BASE_DIR.concat(SLASH).concat(seller.getName());
-                final var filePath = Paths.get(baseDirWithSellerName);
-                if (!Files.exists(filePath)) {
-                    Files.createDirectory(filePath);
+                final var offset = Math.max(Math.ceil((double) total / (double) LIMIT), 1.0);
+                for (int i = 0; i < offset; i++) {
+                    final var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, LIMIT, LIMIT * i);
+                    final var baseDirWithSellerName = BASE_DIR.concat(SLASH).concat(seller.getName());
+                    final var filePath = Paths.get(baseDirWithSellerName.concat(SLASH).concat(String.valueOf(i)));
+                    if (!Files.exists(filePath)) {
+                        Files.createDirectories(filePath);
+                    }
+                    this.csvServ.create(seller, filePath.toString());
+                    futureResults.add(this.yaServ.generateImg(this.modelMapper.map(seller, Seller.class), filePath.toString()));
                 }
-                futureResults.add(this.csvServ.create(this.modelMapper.map(seller, Seller.class)));
-                futureResults.add(this.yaServ.generateImg(this.modelMapper.map(seller, Seller.class)));
             } catch (final IOException | InterruptedException e) {
                 log.error("Catch App.run. seller=".concat(trimedSellerAsStr), e);
             }

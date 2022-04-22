@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.util.concurrent.CompletableFuture;
-
 @SpringJUnitConfig(jp.co.tk.domain.service.YAServiceTest.Config.class)
 public class CsvServiceTest {
 
@@ -23,8 +21,7 @@ public class CsvServiceTest {
     @Test
     public void CSVが生成出来るか() throws Exception {
         var seller = this.yaServ.findSellerBySellerName("tomomooo0716", 5, 0);
-        var result = csvServ.create(seller);
-        CompletableFuture.completedFuture(result).join();
+        csvServ.create(seller, "./out/tomomooo0716");
     }
 
 

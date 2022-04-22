@@ -31,21 +31,6 @@ public class JavaConfig {
     }
 
     /**
-     * 非同期のオブジェクトを返却します。
-     *
-     * @return Executor
-     */
-    @Bean("GenCsvThread")
-    public Executor generateCsvTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(1);
-        executor.setQueueCapacity(3);
-        executor.setMaxPoolSize(10);
-        executor.setThreadNamePrefix("GenCsvThread-");
-        return executor;
-    }
-
-    /**
      * Beanをコピーオブジェクトを返却します。
      *
      * @return ModelMapper
