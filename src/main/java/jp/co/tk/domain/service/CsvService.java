@@ -29,9 +29,9 @@ public class CsvService {
     private static final String SLASH = System.getProperty("file.separator");
 
     /**
-     * ハイフン
+     * アンダーバー
      */
-    private static final String HYPHEN = "-";
+    private static final String UNDERBAR = "_";
 
     /**
      * csvの拡張子
@@ -62,7 +62,7 @@ public class CsvService {
     public void create(final Seller seller, final String outputDir) throws IOException {
 
         final var fileBlr = new StringBuilder(seller.getName());
-        fileBlr.append(HYPHEN);
+        fileBlr.append(UNDERBAR);
         fileBlr.append(System.currentTimeMillis());
         fileBlr.append(EXTENSION);
 

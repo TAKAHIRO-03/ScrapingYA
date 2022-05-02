@@ -16,6 +16,11 @@ public abstract class Product {
     public static String SLASH = "/";
 
     /**
+     * スラッシュを表すフィールドです。
+     */
+    public static String TOHTEN = "、";
+
+    /**
      * CSVのヘッダー情報を取得します。
      *
      * @return CSVヘッダー
