@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -102,6 +101,11 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
     private final static String REGEX_NON_NUM = "\\D";
 
     /**
+     * 正規表現で使用する価格です。
+     */
+    private final static String PRICE = "価格";
+
+    /**
      * @param idAndCategory
      * @return
      * @throws IOException
@@ -123,14 +127,14 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
             startingPriceTmp = "0".concat(YEN);
         }
 
-        final String startingPrice = startingPriceTmp;
+        final var startingPrice = startingPriceTmp;
         final var buyoutPrice = document.getElementsByClass(BUYNOW_PRICE_CLASS).text();
         final var imgIterator = document.getElementsByClass(IMG_CLASS).tagName(IMG_TAG).iterator();
         final var imgUrls = new HashSet<URL>();
         while (imgIterator.hasNext()) {
             final var p = imgIterator.next();
             final var imgs = p.getElementsByTag(IMG_TAG);
-            for (final Element e : imgs) {
+            for (final var e : imgs) {
                 final var urlAsStr = e.absUrl(SRC_ATTR);
                 if (StringUtils.isNotBlank(urlAsStr)) {
                     final var imgUrl = new URL(urlAsStr);
@@ -271,8 +275,9 @@ public class YARepositoryImpl implements WebContentRepository<Product, YAProduct
      * @return 数値
      */
     Long convertToNum(final String target) {
-        final int index = target.indexOf(YEN);
-        final String startUntilYen = target.substring(0, index);
+        final var yenIndex = target.indexOf(YEN);
+        final var priceIndex = target.indexOf(PRICE);
+        final var startUntilYen = priceIndex == -1 ? target.substring(0, yenIndex) : target.substring(priceIndex, yenIndex);
         return Long.valueOf(startUntilYen.replaceAll(REGEX_NON_NUM, BLANK));
     }
 

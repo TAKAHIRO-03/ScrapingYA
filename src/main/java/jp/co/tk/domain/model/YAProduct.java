@@ -1,6 +1,7 @@
 package jp.co.tk.domain.model;
 
 import lombok.Value;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URL;
@@ -85,9 +86,9 @@ public final class YAProduct extends Product {
         final var sb = new StringBuilder();
         sb.append(idAndCategory.getCategory());
         sb.append(COMMA);
-        sb.append(title);
+        sb.append(RegExUtils.replaceAll(title, COMMA, TOHTEN));
         sb.append(COMMA);
-        sb.append(description);
+        sb.append(RegExUtils.replaceAll(description, COMMA, TOHTEN));
         sb.append(COMMA);
         sb.append(startingPrice);
         sb.append(COMMA);
