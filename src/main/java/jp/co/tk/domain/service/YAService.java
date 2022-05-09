@@ -72,11 +72,11 @@ public class YAService {
         }
 
         final var products = new HashSet<Product>();
-        final Set<YAProduct.IdAndCategory> idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, total, offset);
+        final var idAndCategory = this.repo.fetchProductNameListPageBySeller(seller, total, offset);
         Thread.sleep(getSleepTime());
-        for (final YAProduct.IdAndCategory id : idAndCategory) {
+        for (final var id : idAndCategory) {
             try {
-                final Product product = this.repo.fetchByProductId(id);
+                final var product = this.repo.fetchByProductId(id);
                 products.add(product);
             } catch (final IOException e) {
                 log.error("Catch YAService.findSellerBySellerName. id=".concat(id.toString()), e);

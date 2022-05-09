@@ -59,11 +59,6 @@ public class App implements ApplicationRunner {
      */
     private static final String SLASH = System.getProperty("file.separator");
 
-    /**
-     * CSV出力件数
-     */
-    private static final int LIMIT = 50;
-
     static {
         BASE_DIR = ".".concat(SLASH).concat("out");
     }
@@ -78,6 +73,15 @@ public class App implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
         final var sellerAsStrAry = this.csvServ.readSellerList();
+        final var argsValues = args.getNonOptionArgs();
+        final int limit;
+        if (argsValues.isEmpty()) {
+            limit = 20;
+        } else {
+            limit = Integer.valueOf(argsValues.get(0));
+        }
+
+        log.debug("limit=" + limit);
 
         final var futureResults = new ArrayList<CompletableFuture<Void>>();
         for (final var sellerAsStr : sellerAsStrAry) {
@@ -85,10 +89,11 @@ public class App implements ApplicationRunner {
             final var trimedSellerAsStr = sellerAsStr.trim();
             try {
                 final var total = this.yaServ.count(trimedSellerAsStr);
+                log.debug(trimedSellerAsStr + " owned " + total + " products");
                 Thread.sleep(2000);
-                final var offset = Math.max(Math.ceil((double) total / (double) LIMIT), 1.0);
+                final var offset = Math.max(Math.ceil((double) total / (double) limit), 1.0);
                 for (int i = 0; i < offset; i++) {
-                    final var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, LIMIT, LIMIT * i);
+                    final var seller = this.yaServ.findSellerBySellerName(trimedSellerAsStr, limit, limit * i);
                     final var baseDirWithSellerName = BASE_DIR.concat(SLASH).concat(seller.getName());
                     final var filePath = Paths.get(baseDirWithSellerName.concat(SLASH).concat(String.valueOf(i)));
                     if (!Files.exists(filePath)) {
